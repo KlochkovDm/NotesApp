@@ -72,6 +72,8 @@ public class NoteDetailsFragment extends Fragment implements Observer {
 
         noteName.setText(note.getName());
 
+
+
     }
 
     @Override
