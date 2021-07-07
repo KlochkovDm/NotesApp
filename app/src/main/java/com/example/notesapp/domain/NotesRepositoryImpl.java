@@ -17,6 +17,24 @@ public class NotesRepositoryImpl implements NotesRepository {
         result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
         result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
         result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
+        result.add(new Note(R.string.test_text, R.string.test_text, R.string.test_text));
+        result.add(new Note(R.string.test_text2, R.string.test_text2, R.string.test_text2));
+        result.add(new Note(R.string.test_text3, R.string.test_text3, R.string.test_text3));
 
         return result;
     }

@@ -22,18 +22,23 @@ import com.example.notesapp.ui.PublisherHolder;
 
 public class NoteDetailsFragment extends Fragment implements Observer {
 
+
+
     private static final String ARG_NOTE = "ARG_NOTE";
 
     public static NoteDetailsFragment newInstance(Note note) {
         NoteDetailsFragment fragment = new NoteDetailsFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(ARG_NOTE, note);
-        fragment.setArguments(bundle);
+        if (bundle != null) {
+            fragment.setArguments(bundle);
+        }
 
         return fragment;
     }
 
     private Publisher publisher;
+    private Note note;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -68,7 +73,9 @@ public class NoteDetailsFragment extends Fragment implements Observer {
 
         TextView noteName = view.findViewById(R.id.note_name);
 
-        Note note = getArguments().getParcelable(ARG_NOTE);
+        if (getArguments().getParcelable(ARG_NOTE) != null) {
+        note = getArguments().getParcelable(ARG_NOTE);
+        }
 
         noteName.setText(note.getName());
 
