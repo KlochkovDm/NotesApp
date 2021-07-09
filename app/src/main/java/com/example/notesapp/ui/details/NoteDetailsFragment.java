@@ -73,12 +73,10 @@ public class NoteDetailsFragment extends Fragment implements Observer {
 
         TextView noteName = view.findViewById(R.id.note_name);
 
-        if (getArguments().getParcelable(ARG_NOTE) != null) {
-        note = getArguments().getParcelable(ARG_NOTE);
+        if (getArguments() != null && getArguments().getParcelable(ARG_NOTE) != null) {
+            note = getArguments().getParcelable(ARG_NOTE);
+            noteName.setText(note.getName());
         }
-
-        noteName.setText(note.getName());
-
 
 
     }
