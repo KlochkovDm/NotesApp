@@ -13,7 +13,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notesapp.R;
 import com.example.notesapp.domain.Note;
@@ -77,53 +82,29 @@ public class NoteListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        LinearLayout notesList = view.findViewById(R.id.note_list_container);
+        RecyclerView notesList = view.findViewById(R.id.note_list_container);
+        notesList.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(requireContext(), GridLayoutManager.VERTICAL);
+        dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_separator));
+        notesList.addItemDecoration(dividerItemDecoration);
+
 
         List<Note> notes = notesRepository.getNotes();
 
-        for (Note note : notes) {
-
-            View itemView = LayoutInflater.from(requireContext()).inflate(R.layout.item_note, notesList, false);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        NotesAdapter notesAdapter = new NotesAdapter();
+        notesAdapter.setData(notes);
+        notesAdapter.setListener(new NotesAdapter.OnNoteClickListener() {
+            @Override
+            public void onNoteClickListener(@NonNull Note note) {
                     if (onNoteClicked != null) {
                         onNoteClicked.onNoteClicked(note);
                     }
+            }
+        });
 
-                    if (publisher != null) {
-                        publisher.notify(note);
-                    }
-                }
-            });
-
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    PopupMenu menu = new PopupMenu(requireContext(), v);
-                    requireActivity().getMenuInflater().inflate(R.menu.menu_popup,menu.getMenu());
-                    menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            if(item.getItemId()==R.id.popup_delete){
-                                Toast.makeText(requireContext(), "Note deleted", Toast.LENGTH_SHORT).show();
-                                return true;
-                            }
-                            return false;
-                        }
-                    });
-                    menu.show();
-                    return true;
-                }
-            });
-
-            TextView noteName = itemView.findViewById(R.id.note_name);
-            noteName.setText(note.getName());
-            notesList.addView(itemView);
-
-
-        }
+        notesList.setAdapter(notesAdapter);
+        notesAdapter.notifyDataSetChanged();
 
     }
 

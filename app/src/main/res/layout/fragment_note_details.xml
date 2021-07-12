@@ -31,12 +31,14 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/note_save"
         android:layout_gravity="bottom"
+        android:backgroundTint="@color/color_android"
         style="@style/note_details"
         android:text="@string/save"
         />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/note_delete"
         style="@style/note_details"
+        android:backgroundTint="@color/color_android"
         android:layout_gravity="bottom"
         android:text="@string/delete_note"
         />
