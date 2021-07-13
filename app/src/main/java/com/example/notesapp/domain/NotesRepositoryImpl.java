@@ -1,5 +1,8 @@
 package com.example.notesapp.domain;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -9,12 +12,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NotesRepositoryImpl implements NotesRepository {
 
     public static final NotesRepository INSTANCE = new NotesRepositoryImpl();
 
     private final ArrayList<Note> notes = new ArrayList<>();
+
+    private ExecutorService executor = Executors.newCachedThreadPool();
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public NotesRepositoryImpl() {
         notes.add(new Note("N1","TITLE","description", new Date()));
@@ -35,6 +45,29 @@ public class NotesRepositoryImpl implements NotesRepository {
         notes.add(new Note("N16","TITLE3","description3", new Date()));
         notes.add(new Note("N17","TITLE4","description4", new Date()));
         notes.add(new Note("N18","TITLE5","description5", new Date()));
+    }
+
+
+    @Override
+    public void getNotes(Callback<List<Note>> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    Thread.sleep(2000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onSuccess(notes);
+                    }
+                });
+            }
+        });
+
     }
 
     @Override
@@ -84,8 +117,4 @@ public class NotesRepositoryImpl implements NotesRepository {
         return note;
     }
 
-    @Override
-    public List<Note> getNotes() {
-        return notes;
-    }
 }

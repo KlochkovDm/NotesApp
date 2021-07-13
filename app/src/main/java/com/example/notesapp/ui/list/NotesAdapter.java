@@ -31,10 +31,20 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         notes.add(addedNote);
         return notes.size()-1;
     }
-    public void remove(Note longClickedNote) {
-        notes.remove(longClickedNote);
+    public void remove(Note noteToRemove) {
+        notes.remove(noteToRemove);
     }
 
+    public void update(Note note) {
+        for (int i = 0; i < notes.size(); i++) {
+            Note item = notes.get(i);
+            if (item.getId().equals(note.getId())) {
+                notes.remove(i);
+                notes.add(i, note);
+                return;
+            }
+        }
+    }
 
     private OnNoteClickedListener listener;
     private OnNoteLongClickedListener longClickedListener;

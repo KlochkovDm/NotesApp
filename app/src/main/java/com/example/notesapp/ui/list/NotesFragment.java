@@ -6,16 +6,19 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notesapp.R;
+import com.example.notesapp.domain.Callback;
 import com.example.notesapp.domain.Note;
 import com.example.notesapp.domain.NotesRepository;
 import com.example.notesapp.domain.NotesRepositoryImpl;
@@ -25,17 +28,15 @@ import com.example.notesapp.ui.RouterHolder;
 import com.example.notesapp.ui.details.UpdateNoteFragment;
 
 import java.util.Collections;
+import java.util.List;
 
 public class NotesFragment extends Fragment {
-
-    public interface OnNoteClicked {
-        void onNoteClicked(Note note);
-    }
-    private OnNoteClicked onNoteClicked;
 
     private int longClickedIndex;
     private Note longClickedNote;
 
+    private ProgressBar progressBar;
+    private boolean isLoading = false;
 
     public static final String TAG = "NotesFragment";
     private final NotesRepository repository = NotesRepositoryImpl.INSTANCE;
@@ -51,8 +52,22 @@ public class NotesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         notesAdapter = new NotesAdapter(this);
 
-        notesAdapter.setData(repository.getNotes());
-        notesAdapter.notifyDataSetChanged();
+        isLoading = true;
+
+        repository.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onSuccess(List<Note> result) {
+                notesAdapter.setData(result);
+                notesAdapter.notifyDataSetChanged();
+
+                isLoading  = false;
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
+
+//        notesAdapter.notifyDataSetChanged();
 
 
         notesAdapter.setListener(new NotesAdapter.OnNoteClickedListener() {
@@ -78,6 +93,21 @@ public class NotesFragment extends Fragment {
 
             }
         });
+
+
+        getParentFragmentManager().setFragmentResultListener(UpdateNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if (result.containsKey(UpdateNoteFragment.ARG_NOTE)){
+                Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
+                notesAdapter.update(note);
+
+//                notesAdapter.notifyItemChanged();
+
+                }
+            }
+        });
+
     }
 
     @Nullable
@@ -93,7 +123,11 @@ public class NotesFragment extends Fragment {
 
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         RecyclerView notesList = view.findViewById(R.id.note_list_container);
+        progressBar = view.findViewById(R.id.progress);
 
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
 
         toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
             @Override
