@@ -14,7 +14,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.example.notesapp.R;
+import com.example.notesapp.domain.Callback;
 import com.example.notesapp.domain.Note;
+import com.example.notesapp.domain.NotesFirestoreRepository;
 import com.example.notesapp.domain.NotesRepository;
 import com.example.notesapp.domain.NotesRepositoryImpl;
 import com.example.notesapp.ui.MainRouter;
@@ -30,7 +32,7 @@ public class UpdateNoteFragment extends Fragment {
     public static final String ARG_NOTE = "ARG_NOTE";
     public static final String UPDATE_RESULT = "UPDATE_RESULT";
 
-    private final NotesRepository repository = NotesRepositoryImpl.INSTANCE;
+    private final NotesRepository repository = NotesFirestoreRepository.INSTANCE;
     private int selectedYear = -1;
     private int selectedMonthOfYear = -1;
     private int selectedDayOfMonth = -1;
@@ -92,18 +94,21 @@ public class UpdateNoteFragment extends Fragment {
 
                         selectedDate = calendar.getTime();
                     }
-                    Note result = repository.update(note, title.getText().toString(), description.getText().toString(), selectedDate);
+                    repository.update(note, title.getText().toString(), description.getText().toString(), selectedDate, new Callback<Note>() {
+                        @Override
+                        public void onSuccess(Note result) {
+                            if (requireActivity() instanceof RouterHolder) {
+                                MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
 
-                    if (requireActivity() instanceof RouterHolder) {
-                        MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(ARG_NOTE, result);
 
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(ARG_NOTE, result);
+                                getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
 
-                        getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
-
-                        router.back();
-                    }
+                                router.back();
+                            }
+                        }
+                    });
                     return true;
                 }
                 return false;

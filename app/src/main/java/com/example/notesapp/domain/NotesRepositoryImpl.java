@@ -71,24 +71,28 @@ public class NotesRepositoryImpl implements NotesRepository {
     }
 
     @Override
-    public void clear() {
+    public void clear(Callback<Object> callback) {
         notes.clear();
+
+        callback.onSuccess(notes);
     }
 
     @Override
-    public Note add(String title, String description) {
+    public void add(String title, String description, Callback<Note> callback) {
         Note note =  new Note(UUID.randomUUID().toString(), title, description, new Date());
         notes.add(note);
-        return note;
+
+        callback.onSuccess(note);
     }
 
     @Override
-    public void remove(Note note) {
+    public void remove(Note note, Callback<Object> callback) {
         notes.remove(note);
+        callback.onSuccess(note);
     }
 
     @Override
-    public Note update(@NonNull Note note, @Nullable String title, @Nullable String description, @Nullable Date date) {
+    public void update(@NonNull Note note, @Nullable String title, @Nullable String description, @Nullable Date date, Callback<Note> callback) {
 
         for (int i = 0; i < notes.size(); i++) {
             Note item = notes.get(i);
@@ -111,10 +115,11 @@ public class NotesRepositoryImpl implements NotesRepository {
                 notes.remove(i);
                 notes.add(i, newNote);
 
-                return newNote;
+
+                callback.onSuccess(newNote);
             }
         }
-        return note;
+        callback.onSuccess(note);
     }
 
 }
