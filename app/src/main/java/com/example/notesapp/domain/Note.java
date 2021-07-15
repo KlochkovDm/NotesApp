@@ -3,26 +3,28 @@ package com.example.notesapp.domain;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.StringRes;
+import java.util.Date;
 
 public class Note implements Parcelable {
 
-    @StringRes
-    private final int name;
-    private final int description;
-    private final int date;
 
-    public Note(int name, int description, int date) {
-        this.name = name;
-        this.date = date;
+    private final String id;
+    private String title;
+    private String description;
+    private Date date;
+
+    public Note(String id, String title, String description, Date date) {
+        this.id = id;
+        this.title = title;
         this.description = description;
+        this.date = date;
     }
 
     protected Note(Parcel in) {
-        name = in.readInt();
-        date = in.readInt();
-        description = in.readInt();
+        id = in.readString();
+        title = in.readString();
+        description = in.readString();
+        date = new Date(in.readLong());
     }
 
     public static final Creator<Note> CREATOR = new Creator<Note>() {
@@ -45,13 +47,37 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(name);
-        dest.writeInt(date);
-        dest.writeInt(description);
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeLong(date.getTime());
     }
 
-    public int getName() {
-        return name;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getId() {
+        return id;
     }
 
 }
