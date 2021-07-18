@@ -10,11 +10,11 @@ public interface NotesRepository {
 
     void getNotes(Callback<List<Note>> callback);
 
-    void clear();
+    void clear(Callback<Object> callback);
 
-    Note add(String title, String description);
+    void add(String title, String description, Callback<Note> callback);
 
-    void remove (Note note);
+    void remove (Note note, Callback<Object> callback);
 
-    Note update (@NonNull Note note, @Nullable String title, @Nullable String description, @Nullable Date date);
+    void update (@NonNull Note note, @Nullable String title, @Nullable String description, @Nullable Date date, Callback<Note> callback);
 }

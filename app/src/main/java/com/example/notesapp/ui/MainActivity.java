@@ -8,9 +8,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentResultListener;
 
 import com.example.notesapp.R;
 import com.example.notesapp.domain.Note;
+import com.example.notesapp.ui.auth.AuthFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.Date;
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements RouterHolder {
          setContentView(R.layout.activity_main);
 
         router = new MainRouter(getSupportFragmentManager());
-        if (savedInstanceState== null) {router.showNotes();}
+        if (savedInstanceState== null) {router.showAuth();}
 
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -57,6 +59,13 @@ public class MainActivity extends AppCompatActivity implements RouterHolder {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        getSupportFragmentManager().setFragmentResultListener(AuthFragment.AUTH_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                router.showNotes();
             }
         });
 

@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.notesapp.R;
 import com.example.notesapp.domain.Callback;
 import com.example.notesapp.domain.Note;
+import com.example.notesapp.domain.NotesFirestoreRepository;
 import com.example.notesapp.domain.NotesRepository;
 import com.example.notesapp.domain.NotesRepositoryImpl;
 import com.example.notesapp.ui.MainActivity;
@@ -29,6 +30,7 @@ import com.example.notesapp.ui.details.UpdateNoteFragment;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class NotesFragment extends Fragment {
 
@@ -39,7 +41,7 @@ public class NotesFragment extends Fragment {
     private boolean isLoading = false;
 
     public static final String TAG = "NotesFragment";
-    private final NotesRepository repository = NotesRepositoryImpl.INSTANCE;
+    private final NotesRepository repository = NotesFirestoreRepository.INSTANCE;
     private NotesAdapter notesAdapter;
 
 
@@ -102,7 +104,7 @@ public class NotesFragment extends Fragment {
                 Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
                 notesAdapter.update(note);
 
-//                notesAdapter.notifyItemChanged();
+//                notesAdapter.notifyItemChanged(longClickedIndex);
 
                 }
             }
@@ -133,16 +135,26 @@ public class NotesFragment extends Fragment {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_add) {
-                    Note addedNote = repository.add("NEW TITLE", "NEW DESCRIPTION");
-                    int index = notesAdapter.add(addedNote);
-                    notesAdapter.notifyItemInserted(index);
-                    notesList.scrollToPosition(index);
+                    repository.add("NEW TITLE", "NEW DESCRIPTION", new Callback<Note>() {
+                        @Override
+                        public void onSuccess(Note result) {
+
+                            int index = notesAdapter.add(result);
+                            notesAdapter.notifyItemInserted(index);
+                            notesList.scrollToPosition(index);
+
+                        }
+                    });
                     return true;
                 }
                 if (item.getItemId() == R.id.action_clear) {
-                    repository.clear();
-                    notesAdapter.setData(Collections.emptyList());
-                    notesAdapter.notifyDataSetChanged();
+                    repository.clear(new Callback<Object>() {
+                        @Override
+                        public void onSuccess(Object result) {
+                            notesAdapter.setData(Collections.emptyList());
+                            notesAdapter.notifyDataSetChanged();
+                        }
+                    });
                     return true;
                 }
 
@@ -154,7 +166,7 @@ public class NotesFragment extends Fragment {
         notesList.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(requireContext(), GridLayoutManager.VERTICAL);
-        dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_separator));
+        dividerItemDecoration.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(requireContext(), R.drawable.ic_separator)));
         notesList.addItemDecoration(dividerItemDecoration);
 
         notesList.setAdapter(notesAdapter);
@@ -179,10 +191,13 @@ public class NotesFragment extends Fragment {
             return true;
         }
         if(item.getItemId() == R.id.action_delete){
-            repository.remove(longClickedNote);
-            notesAdapter.remove(longClickedNote);
-            notesAdapter.notifyItemRemoved(longClickedIndex);
-
+            repository.remove(longClickedNote, new Callback<Object>() {
+                @Override
+                public void onSuccess(Object result) {
+                    notesAdapter.remove(longClickedNote);
+                    notesAdapter.notifyItemRemoved(longClickedIndex);
+                }
+            });
             return true;
         }
 
