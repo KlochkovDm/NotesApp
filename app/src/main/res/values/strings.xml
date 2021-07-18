@@ -20,6 +20,13 @@
     <string name="title_hint">Title</string>
     <string name="description_hint">Description</string>
     <string name="action_done">Done</string>
+    <string name="all_clear_dialog_message">Delete all notes?</string>
+    <string name="btn_positive">Yes</string>
+    <string name="btn_negative">No</string>
+    <string name="list_title">Attention!</string>
+    <string name="all_clear_dialog_title">Attention!</string>
+    <string name="single_delete_dialog_title">Attention!</string>
+    <string name="single_delete_dialog_message">"Do you really want to delete this note? "</string>
 
 
 </resources>
