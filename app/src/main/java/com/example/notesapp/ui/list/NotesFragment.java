@@ -45,7 +45,7 @@ public class NotesFragment extends Fragment {
     private NotesAdapter notesAdapter;
 
 
-    public static NotesFragment  newInstance() {
+    public static NotesFragment newInstance() {
         return new NotesFragment();
     }
 
@@ -62,8 +62,8 @@ public class NotesFragment extends Fragment {
                 notesAdapter.setData(result);
                 notesAdapter.notifyDataSetChanged();
 
-                isLoading  = false;
-                if(progressBar != null){
+                isLoading = false;
+                if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
             }
@@ -80,8 +80,8 @@ public class NotesFragment extends Fragment {
 //                    MainActivity mainActivity = (MainActivity) requireActivity();
 //                    mainActivity.getRouter().showEditNote(note);}
 //
-                if (requireActivity() instanceof RouterHolder) {
-                    MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
+                if (NotesFragment.this.requireActivity() instanceof RouterHolder) {
+                    MainRouter router = ((RouterHolder) NotesFragment.this.requireActivity()).getMainRouter();
                     router.showEditNote(note);
                 }
             }
@@ -100,10 +100,9 @@ public class NotesFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(UpdateNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                if (result.containsKey(UpdateNoteFragment.ARG_NOTE)){
-                Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
-                notesAdapter.update(note);
-
+                if (result.containsKey(UpdateNoteFragment.ARG_NOTE)) {
+                    Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
+                    notesAdapter.update(note);
 //                notesAdapter.notifyItemChanged(longClickedIndex);
 
                 }
@@ -131,35 +130,32 @@ public class NotesFragment extends Fragment {
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_add) {
-                    repository.add("NEW TITLE", "NEW DESCRIPTION", new Callback<Note>() {
-                        @Override
-                        public void onSuccess(Note result) {
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_add) {
+                repository.add("NEW TITLE", "NEW DESCRIPTION", new Callback<Note>() {
+                    @Override
+                    public void onSuccess(Note result) {
 
-                            int index = notesAdapter.add(result);
-                            notesAdapter.notifyItemInserted(index);
-                            notesList.scrollToPosition(index);
+                        int index = notesAdapter.add(result);
+                        notesAdapter.notifyItemInserted(index);
+                        notesList.scrollToPosition(index);
 
-                        }
-                    });
-                    return true;
-                }
-                if (item.getItemId() == R.id.action_clear) {
-                    repository.clear(new Callback<Object>() {
-                        @Override
-                        public void onSuccess(Object result) {
-                            notesAdapter.setData(Collections.emptyList());
-                            notesAdapter.notifyDataSetChanged();
-                        }
-                    });
-                    return true;
-                }
-
-                return false;
+                    }
+                });
+                return true;
             }
+            if (item.getItemId() == R.id.action_clear) {
+                repository.clear(new Callback<Object>() {
+                    @Override
+                    public void onSuccess(Object result) {
+                        notesAdapter.setData(Collections.emptyList());
+                        notesAdapter.notifyDataSetChanged();
+                    }
+                });
+                return true;
+            }
+
+            return false;
         });
 
 
@@ -182,7 +178,7 @@ public class NotesFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.action_update){
+        if (item.getItemId() == R.id.action_update) {
             if (requireActivity() instanceof RouterHolder) {
                 MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
                 router.showEditNote(longClickedNote);
@@ -190,7 +186,7 @@ public class NotesFragment extends Fragment {
 
             return true;
         }
-        if(item.getItemId() == R.id.action_delete){
+        if (item.getItemId() == R.id.action_delete) {
             repository.remove(longClickedNote, new Callback<Object>() {
                 @Override
                 public void onSuccess(Object result) {
