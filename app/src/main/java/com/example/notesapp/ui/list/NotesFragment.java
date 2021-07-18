@@ -22,10 +22,9 @@ import com.example.notesapp.domain.Callback;
 import com.example.notesapp.domain.Note;
 import com.example.notesapp.domain.NotesFirestoreRepository;
 import com.example.notesapp.domain.NotesRepository;
-import com.example.notesapp.domain.NotesRepositoryImpl;
-import com.example.notesapp.ui.MainActivity;
 import com.example.notesapp.ui.MainRouter;
 import com.example.notesapp.ui.RouterHolder;
+import com.example.notesapp.ui.alerts.AlertDialogFragment;
 import com.example.notesapp.ui.details.UpdateNoteFragment;
 
 import java.util.Collections;
@@ -45,7 +44,7 @@ public class NotesFragment extends Fragment {
     private NotesAdapter notesAdapter;
 
 
-    public static NotesFragment  newInstance() {
+    public static NotesFragment newInstance() {
         return new NotesFragment();
     }
 
@@ -62,8 +61,8 @@ public class NotesFragment extends Fragment {
                 notesAdapter.setData(result);
                 notesAdapter.notifyDataSetChanged();
 
-                isLoading  = false;
-                if(progressBar != null){
+                isLoading = false;
+                if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
             }
@@ -80,8 +79,8 @@ public class NotesFragment extends Fragment {
 //                    MainActivity mainActivity = (MainActivity) requireActivity();
 //                    mainActivity.getRouter().showEditNote(note);}
 //
-                if (requireActivity() instanceof RouterHolder) {
-                    MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
+                if (NotesFragment.this.requireActivity() instanceof RouterHolder) {
+                    MainRouter router = ((RouterHolder) NotesFragment.this.requireActivity()).getMainRouter();
                     router.showEditNote(note);
                 }
             }
@@ -100,10 +99,9 @@ public class NotesFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(UpdateNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                if (result.containsKey(UpdateNoteFragment.ARG_NOTE)){
-                Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
-                notesAdapter.update(note);
-
+                if (result.containsKey(UpdateNoteFragment.ARG_NOTE)) {
+                    Note note = result.getParcelable(UpdateNoteFragment.ARG_NOTE);
+                    notesAdapter.update(note);
 //                notesAdapter.notifyItemChanged(longClickedIndex);
 
                 }
@@ -123,6 +121,36 @@ public class NotesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        getChildFragmentManager().setFragmentResultListener(AlertDialogFragment.RESULT, getViewLifecycleOwner(), new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if (result.containsKey(AlertDialogFragment.RESULT_ALL_CLEAR)) {
+                    if (result.getBoolean(AlertDialogFragment.RESULT_ALL_CLEAR)){
+                        repository.clear(new Callback<Object>() {
+                            @Override
+                            public void onSuccess(Object result) {
+                                notesAdapter.setData(Collections.emptyList());
+                                notesAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                    return;
+                }
+                if (result.containsKey(AlertDialogFragment.RESULT_SINGLE_DELETE)) {
+                    if (result.getBoolean(AlertDialogFragment.RESULT_SINGLE_DELETE)) {
+                        repository.remove(longClickedNote, new Callback<Object>() {
+                            @Override
+                            public void onSuccess(Object result) {
+                                notesAdapter.remove(longClickedNote);
+                                notesAdapter.notifyItemRemoved(longClickedIndex);
+                            }
+                        });
+                    }
+                    return;
+                }
+            }
+        });
+
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         RecyclerView notesList = view.findViewById(R.id.note_list_container);
         progressBar = view.findViewById(R.id.progress);
@@ -131,35 +159,34 @@ public class NotesFragment extends Fragment {
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_add) {
-                    repository.add("NEW TITLE", "NEW DESCRIPTION", new Callback<Note>() {
-                        @Override
-                        public void onSuccess(Note result) {
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_add) {
+                repository.add("NEW TITLE", "NEW DESCRIPTION", new Callback<Note>() {
+                    @Override
+                    public void onSuccess(Note result) {
 
-                            int index = notesAdapter.add(result);
-                            notesAdapter.notifyItemInserted(index);
-                            notesList.scrollToPosition(index);
+                        int index = notesAdapter.add(result);
+                        notesAdapter.notifyItemInserted(index);
+                        notesList.scrollToPosition(index);
 
-                        }
-                    });
-                    return true;
-                }
-                if (item.getItemId() == R.id.action_clear) {
-                    repository.clear(new Callback<Object>() {
-                        @Override
-                        public void onSuccess(Object result) {
-                            notesAdapter.setData(Collections.emptyList());
-                            notesAdapter.notifyDataSetChanged();
-                        }
-                    });
-                    return true;
-                }
-
-                return false;
+                    }
+                });
+                return true;
             }
+            if (item.getItemId() == R.id.action_clear) {
+                AlertDialogFragment.newInstance(R.string.all_clear_dialog_title, R.string.all_clear_dialog_message, AlertDialogFragment.ALL_CLEAR_TYPE)
+                        .show(getChildFragmentManager(), AlertDialogFragment.TAG);
+//                repository.clear(new Callback<Object>() {
+//                    @Override
+//                    public void onSuccess(Object result) {
+//                        notesAdapter.setData(Collections.emptyList());
+//                        notesAdapter.notifyDataSetChanged();
+//                    }
+//                });
+                return true;
+            }
+
+            return false;
         });
 
 
@@ -182,7 +209,7 @@ public class NotesFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.action_update){
+        if (item.getItemId() == R.id.action_update) {
             if (requireActivity() instanceof RouterHolder) {
                 MainRouter router = ((RouterHolder) requireActivity()).getMainRouter();
                 router.showEditNote(longClickedNote);
@@ -190,14 +217,16 @@ public class NotesFragment extends Fragment {
 
             return true;
         }
-        if(item.getItemId() == R.id.action_delete){
-            repository.remove(longClickedNote, new Callback<Object>() {
-                @Override
-                public void onSuccess(Object result) {
-                    notesAdapter.remove(longClickedNote);
-                    notesAdapter.notifyItemRemoved(longClickedIndex);
-                }
-            });
+        if (item.getItemId() == R.id.action_delete) {
+            AlertDialogFragment.newInstance(R.string.single_delete_dialog_title, R.string.single_delete_dialog_message, AlertDialogFragment.SINGLE_DELETE_TYPE)
+                    .show(getChildFragmentManager(), AlertDialogFragment.TAG);
+//            repository.remove(longClickedNote, new Callback<Object>() {
+//                @Override
+//                public void onSuccess(Object result) {
+//                    notesAdapter.remove(longClickedNote);
+//                    notesAdapter.notifyItemRemoved(longClickedIndex);
+//                }
+//            });
             return true;
         }
 

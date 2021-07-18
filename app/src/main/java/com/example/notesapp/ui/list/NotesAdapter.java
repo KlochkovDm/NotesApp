@@ -103,27 +103,21 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getListener() != null) {
-                        getListener().onNoteClickedListener(notes.get(getAdapterPosition()));
-                    }
+            itemView.setOnClickListener(v -> {
+                if (getListener() != null) {
+                    getListener().onNoteClickedListener(notes.get(getAdapterPosition()));
                 }
             });
 
             fragment.registerForContextMenu(itemView);
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    itemView.showContextMenu();
-                    if(getLongClickedListener() != null){
-                        int index = getAdapterPosition();
-                        getLongClickedListener().onNoteLongClickedListener(notes.get(index), index);
-                    }
-                    return true;
+            itemView.setOnLongClickListener(v -> {
+                itemView.showContextMenu();
+                if(getLongClickedListener() != null){
+                    int index = getAdapterPosition();
+                    getLongClickedListener().onNoteLongClickedListener(notes.get(index), index);
                 }
+                return true;
             });
 //            itemView.setOnLongClickListener(new View.OnLongClickListener() {
 //                @Override

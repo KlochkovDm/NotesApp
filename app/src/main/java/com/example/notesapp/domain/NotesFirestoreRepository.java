@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -38,17 +39,24 @@ public class NotesFirestoreRepository implements NotesRepository {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        QuerySnapshot result = task.getResult();
+                        if( result == null ) {
+                            return;
+                        }
+                        List<DocumentSnapshot> documents = result.getDocuments();
+
                         if (task.isSuccessful()) {
 
-                            ArrayList<Note> result = new ArrayList<>();
+                            ArrayList<Note> notes = new ArrayList<>();
 
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+                            for (DocumentSnapshot document : documents) {
                                 String title = (String) document.get(TITLE);
                                 String description = (String) document.get(DESCRIPTION);
                                 Date date = ((Timestamp) document.get(DATE)).toDate();
-                                result.add(new Note(document.getId(), title, description, date));
+                                notes.add(new Note(document.getId(), title, description, date));
                             }
-                            callback.onSuccess(result);
+                            callback.onSuccess(notes);
 
                         } else {
                             task.getException();
@@ -73,8 +81,15 @@ public class NotesFirestoreRepository implements NotesRepository {
                 .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentReference> task) {
+
+                        DocumentReference result = task.getResult();
+                        if( result == null ) {
+                            return;
+                        }
+
                         if (task.isSuccessful()) {
-                            Note note = new Note(task.getResult().getId(), title, description, date);
+
+                            Note note = new Note(result.getId(), title, description, date);
 
                             callback.onSuccess(note);
                         }
@@ -140,16 +155,23 @@ public class NotesFirestoreRepository implements NotesRepository {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        QuerySnapshot result = task.getResult();
+                        if( result == null ) {
+                            return;
+                        }
+                        List<DocumentSnapshot> documents = result.getDocuments();
+
                         if (task.isSuccessful()) {
 
-                            List<Object> result = Collections.emptyList();
+//                            List<Object> result = Collections.emptyList();
 
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+                            for (DocumentSnapshot document : documents) {
                                 firebaseFirestore.collection(NOTES)
                                         .document(document.getId())
                                         .delete();
                             }
-                            callback.onSuccess(result);
+                            callback.onSuccess(Collections.emptyList());
 
                         } else {
                             task.getException();
